@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+</head>
+
+<body>
+    <div class="vertical-center">
+        <div class="container">
+            <!-- 客户端加一个简单的input输入框和一个发送按钮 -->
+            <form onsubmit="connect(); return false;">
+                <div>
+                    <label>id：</label>
+                    <input id="tokenid" name="tokenid" value=""/>
+                </div>
+                <div>
+                    <button onclick="connect()">连接</button>
+                </div>
+            </form>
+            <div role="form" id="chat_form" onsubmit="sendMessage(); return false;" style="margin-top:100px;">
+                <div>
+                    <label>接收者：</label>
+                    <input id="to" name="to" value=""/>
+                </div>
+                <div>
+                    <label>消息类型</label>
+                    <input id="type" name="type" value=""/>
+                </div>
+                <div class="form-group">
+                    <label>消息内容</label>
+                    <input class="form-control" type="text" name="message" id="message" value="" />
+                </div>
+                <button type="button" id="send" class="btn btn-primary" onclick="sendMessage();">
+                    发送
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    //WebSocket实例化
+    var ws = null
+    const fath = $(".container")
+    function connect(){
+        console.log(1)
+        if(ws != null){
+            ws.close()
+        }
+
+        let tokenid = $("#tokenid").val()
+        $.get("http://localhost:3001/"+tokenid,function(token){
+
+            console.log(token)
+            
+            ws = new WebSocket("ws://localhost:8181/"+token)
+
+            ws.onopen = function (e) {
+                fath.append('客户端（client）：与服务器的连接已打开')
+            }
+            ws.onmessage = function (e){
+                console.log(e)
+                let data = e.data
+                fath.append("<p>"+data+"</p>")
+            }
+            ws.onclose = function(e){
+                console.log(e)
+                let data = e.data
+                fath.append("<p>"+"登出"+"</p>")
+            }
+
+        })
+    
+    }
+
+    
+    function sendMessage() {
+        let to = $('#to').val()
+        let type = $("#type").val()
+        let msg = $('#message').val()
+        let data = {
+            "id":Date.now(),
+            "to":   parseInt(to),
+            "type": type,
+            "msg": msg
+        }
+        ws.send(JSON.stringify(data));
+    };
+</script>
+
+</html>
