@@ -28,6 +28,8 @@ const {
     SUC_LOGIN_SUCCESS
 } = require('./constans/returnMessage')
 const {PORT} = require('./config/websocket')
+const pool = require('./util/mysqlconnection')
+
 
 const wss = new Ws({
     port:PORT
@@ -36,6 +38,8 @@ const wss = new Ws({
 // socket对象维护在一个字典里
 // 对应用户id:{"ping":timestamp,"socket":socket}
 const socketList = {}
+const GETHISTORYSTATEMENT = "select * from message where timestamp > ? and to = ? order by id limit 40";
+
 
 // 开启ws服务
 wss.on('connection',async function (connection,req){
@@ -156,6 +160,7 @@ wss.on('connection',async function (connection,req){
                                 }  
                             }
                     }
+                    systemSendFunc(connection,data["id"],0,"A","",Date.now());
                     break
                 }
                 case "i":
@@ -205,8 +210,9 @@ wss.on('connection',async function (connection,req){
                                     errorSendFunc(connection,data["id"],ERR_FAIL_TO_STORAGE_MESSAGE)
                                     return
                                 }  
-                            }
+                            }  
                     }
+                    systemSendFunc(connection,data["id"],0,"A","",Date.now());
                     break
                 }
                 
@@ -242,7 +248,12 @@ wss.on('connection',async function (connection,req){
                         errorSendFunc(connection,data["id"],ERR_STATUS)
                         return
                     }
-    
+                }
+                case "H":
+                {
+                    let date = data["msg"];
+                    let result = await pool.execute(GETHISTORYSTATEMENT,[new Date(date),socketid])
+                    systemSendFunc(connection,data["id"],0,"H",result,Date.now())
                 }
                 case "T":
                 {   
