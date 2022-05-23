@@ -8,7 +8,6 @@ const {
  } = require('./util/redisUtil')
 const {jwtVerifyTokenHandle} = require('./util/jwtUtil')
 const verifyArrivalPackage = require('./util/verifyArrivalPackage')
-console.log(verifyArrivalPackage)
 const {
     errorSendFunc,
     pongSendFunc,
@@ -29,7 +28,7 @@ const {
 } = require('./constans/returnMessage')
 const {PORT} = require('./config/websocket')
 const pool = require('./util/mysqlconnection')
-
+const coordtransform = require('coordtransform')
 
 const wss = new Ws({
     port:PORT
@@ -38,16 +37,20 @@ const wss = new Ws({
 // socket对象维护在一个字典里
 // 对应用户id:{"ping":timestamp,"socket":socket}
 const socketList = {}
-const GETHISTORYSTATEMENT = "select * from message where timestamp > ? and to = ? order by id limit 40";
 
+// 全域查询，查询所有的人发送给我的以及我发送给他们的
+const GETHISTORYSTATEMENT = "select * from message where id > ? and (\`from\` = ? or \`to\` = ?) order by id desc limit 40";
+const GETRECENTHISTORYSTATEMENT = "select * from message where \`from\` = ? or \`to\` =? order by id desc limit 40";
+
+// 精确查询，查某个人发送过来的以及我发送过去的
+const GETRECENTHISTORYBYNAMESTATEMENT = "select * from message where (\`from\` = ? and \`to\` = ?) and (\`from\` = ? and \`to\` = ?) order by id desc limit 40";
+const GETHISTORYBYNAMESTATEMENT = "select * from message where id > ? and ((\`from\` = ? and \`to\` = ?) and (\`from\` = ? and \`to\` = ?)) order by id desc limit 40";
 
 // 开启ws服务
 wss.on('connection',async function (connection,req){
     let socketid = null
     let dcode = null 
     try{
-        console.log("有客户端连接上服务器")
-
         let token = req.url.split('/')[1]
 
         /*
@@ -59,24 +62,26 @@ wss.on('connection',async function (connection,req){
             dcode = await jwtVerifyTokenHandle(token)
         }
         catch(e){
-            errorSendFunc(connection,0,ERR_INVALIDATE_TOKEN)
-            await connection.close()
+            errorSendFunc(connection,0,ERR_INVALIDATE_TOKEN);
+            await connection.close();
+            return;
         }
         if(dcode["type"] != "websocket" || dcode["id"] == null && typeof dcode["id"] != "number")
         {
-            errorSendFunc(connection,0,ERR_INVALIDATE_TOKEN)
-            await connection.close()
+            errorSendFunc(connection,0,ERR_INVALIDATE_TOKEN);
+            await connection.close();
+            return;
         }
         
         console.log(dcode)
+
         socketid = dcode["id"]
-        console.log(socketid)
 
         // 鉴权成功
         if(socketList[socketid] != null)
         {
-            systemSendFunc(socket[socketid],0,0,"S",NOT_CLOSE_WEBSOCKET,Date.now())
-            await socket[socketid]["socket"].close()
+            systemSendFunc(socketList[socketid],0,0,"S",NOT_CLOSE_WEBSOCKET,Date.now())
+            await socketList[socketid]["socket"].close()
         }
 
         socketList[socketid] = {
@@ -85,9 +90,12 @@ wss.on('connection',async function (connection,req){
         }
 
         systemSendFunc(connection,0,0,"L",SUC_LOGIN_SUCCESS,Date.now())
+        
     }catch(e)
     {
-
+        errorSendFunc(connection,0,ERR_UNKNOWN)
+        await connection.close();
+        return;
     }
 
     connection.on("message",async function (data) 
@@ -102,7 +110,7 @@ wss.on('connection',async function (connection,req){
         if(type == "P")
         {
             pongSendFunc(connection,data["id"])
-            socketList[socketid][timestamp] = Date.now()
+            socketList[socketid][ping] = Date.now()
             return
         }
         try
@@ -237,9 +245,10 @@ wss.on('connection',async function (connection,req){
                 {
                     // 首先要判断用户是否是带货员,根据redis的DEVELIVER集合
                     let is = await redisSismember("DELIVER",socketid);
+                    let [longtitude,latitude] = coordtransform.gcj02towgs84(data["msg"]["longtitude"],data["msg"]["latitude"])  
                     if(is)
                     {
-                        redisGeoadd("GEO:DELIVER",[data["msg"]["latitude"],data["msg"]["longtitude"],socketid]);
+                        redisGeoadd("GEO:DELIVER",[latitude,longtitude,socketid]);
                         systemSendFunc(connection,data["id"],0,"A","updated position")
                         return
                     }
@@ -249,11 +258,49 @@ wss.on('connection',async function (connection,req){
                         return
                     }
                 }
-                case "H":
+                case "H": 
                 {
-                    let date = data["msg"];
-                    let result = await pool.execute(GETHISTORYSTATEMENT,[new Date(date),socketid])
-                    systemSendFunc(connection,data["id"],0,"H",result,Date.now())
+                    console.log("safadsfadsfad")
+                    try{
+                        let msg = data["msg"];
+                        let id = msg["id"];
+                        let from = msg["from"];
+                        if(id == -1) // 获取最新的
+                        {
+                            if(from = -1) // 不指定获取某人的
+                            {
+                                let [result] = await pool.execute(GETRECENTHISTORYSTATEMENT,[socketid,socketid]);
+                                await systemSendFunc(connection,data["id"],0,"H",result,Date.now())
+                                return;
+                            }
+                            else // 指定获取某人的
+                            {
+                                let [result] = await pool.execute(GETRECENTHISTORYBYNAMESTATEMENT,[from,socketid,socketid,from]);
+                                await systemSendFunc(connection,data["id"],0,"H",result,Date.now())
+                                return;
+                            }
+                        }
+                        else // 获取指定id之前的
+                        {
+                            if(from = -1) // 不要指定获取某人的
+                            {
+                                let [result] = await pool.execute(GETHISTORYSTATEMENT,[id,socketid,socketid]);
+                                await systemSendFunc(connection,data["id"],0,"H",result,Date.now())
+                                return;
+                            }
+                            else // 指定获取某人的
+                            {
+                                let [result] = await pool.execute(GETHISTORYBYNAMESTATEMENT,[id,from,socketid,socketid,from])
+                                await systemSendFunc(connection,data["id"],0,"H",result,Date.now())
+                                return;
+                            }
+                        }
+                    }catch(e)
+                    {
+                        console.log(e)
+                        errorSendFunc(connection,data["id"],ERR_UNKNOWN)
+                        return
+                    }
                 }
                 case "T":
                 {   
@@ -311,6 +358,7 @@ wss.on('connection',async function (connection,req){
             }
         }catch(e){
             console.log(e)
+            console.log(data);
             errorSendFunc(connection,data["id"],ERR_UNKNOWN);
         }
         

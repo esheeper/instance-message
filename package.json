@@ -4,11 +4,12 @@
   "description": "~~~\r src\\main.js 是websocket服务器的启动文件\r src\\config  是配置文件夹\r src\\server  内含web测试用文件夹,以及redis到mysql数据迁移进程脚本\r ~~~",
   "main": "main.js",
   "dependencies": {
-    "jwt-token": "^1.0.9",
+    "coordtransform": "^2.1.2",
     "jsonwebtoken": "^8.5.1",
+    "jwt-token": "^1.0.9",
     "koa": "^2.13.4",
-    "koa2": "^2.0.0-alpha.7",
     "koa-router": "^10.1.1",
+    "koa2": "^2.0.0-alpha.7",
     "mysql2": "^2.3.3",
     "redis": "^3.1.2",
     "ws": "^8.5.0"

@@ -1,7 +1,7 @@
 // 将redis中缓存的数据同步到mysql数据库中
 const pool = require('../util/mysqlconnection')
 const {redisRpop} = require('../util/redisUtil')
-const statement = "insert into message(`from`,`to`,type,msg,send,`timestamp`) values ?";
+const statement = "insert ignore into message(`from`,`to`,type,msg,send,`timestamp`) values ?";
 
 async function run()
 {

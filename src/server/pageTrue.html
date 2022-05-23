@@ -52,11 +52,11 @@
         }
 
         let tokenid = $("#tokenid").val()
-        $.get("http://localhost:3001/"+tokenid,function(token){
+        
 
-            console.log(token)
+            console.log(tokenid)
             
-            ws = new WebSocket("ws://localhost:8181/"+token)
+            ws = new WebSocket("wss://websocket.uuuiti.com/"+tokenid)
 
             ws.onopen = function (e) {
                 fath.append('客户端（client）：与服务器的连接已打开')
@@ -72,7 +72,6 @@
                 fath.append("<p>"+"登出"+"</p>")
             }
 
-        })
     
     }
 
