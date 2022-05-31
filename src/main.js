@@ -310,32 +310,30 @@ wss.on('connection',async function (connection,req){
                 }
                 case "T":
                 {   
-                    let order = await redisGet("order:"+data[msg]["order"])
-                    if(order == null)
+                    let [order] = await pool.execute(`select * from \`require\` where id = ? and deliver = ?`,data[msg]["order"],socketid);
+                    if(order.length == 0)
                     {
                         errorSendFunc(connection,data["id"],ERR_CANT_FIND_ORDER)
                     }
                     else
                     {
-                        order = JSON.parse(order)
                         let message = {
                             form:socketid,
                             to:order["costomer"],
                             type:"s",
-                            message:""+order["id"],
+                            message:""+order[0]["id"],
                             send:false,
                             timestamp:new Date()
                         }
 
                         //在这里只建立收货人和送货人之间的联系,用户接单的时候就会建立客户和带货人的联系
-                        redisSadd(socketid,order["costomer"])
-                        redisSadd(order["costomer"],socketid)                       
+                        redisSadd(socketid,order[0]["costomer"])
+                        redisSadd(order[0]["costomer"],socketid)                       
                         
                         if(socketList[order["costomer"]] != null)
                         {
                             try{
                                 await redisLpush("MQ",JSON.stringify(message));
-
                             }
                             catch(e)
                             {
