@@ -63,13 +63,13 @@ wss.on('connection',async function (connection,req){
         }
         catch(e){
             errorSendFunc(connection,0,ERR_INVALIDATE_TOKEN);
-            await connection.close();
+            connection.close();
             return;
         }
         if(dcode["type"] != "websocket" || dcode["id"] == null && typeof dcode["id"] != "number")
         {
             errorSendFunc(connection,0,ERR_INVALIDATE_TOKEN);
-            await connection.close();
+            connection.close();
             return;
         }
         
@@ -94,7 +94,7 @@ wss.on('connection',async function (connection,req){
     }catch(e)
     {
         errorSendFunc(connection,0,ERR_UNKNOWN)
-        await connection.close();
+        connection.close();
         return;
     }
 
@@ -105,7 +105,6 @@ wss.on('connection',async function (connection,req){
         {
             errorSendFunc(connection,0,ERR_BAD_DATA_FORMATION)
         }
-
         let type = data["type"]
         if(type == "P")
         {
@@ -260,11 +259,11 @@ wss.on('connection',async function (connection,req){
                 }
                 case "H": 
                 {
-                    console.log("safadsfadsfad")
                     try{
                         let msg = data["msg"];
                         let id = msg["id"];
                         let from = msg["from"];
+                        console.log(msg.id,from);
                         if(id == -1) // 获取最新的
                         {
                             if(from = -1) // 不指定获取某人的
@@ -356,7 +355,8 @@ wss.on('connection',async function (connection,req){
                     errorSendFunc(connection,"Error type")
                     break
             }
-        }catch(e){
+        }
+        catch(e){
             console.log(e)
             console.log(data);
             errorSendFunc(connection,data["id"],ERR_UNKNOWN);
