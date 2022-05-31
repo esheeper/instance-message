@@ -377,3 +377,8 @@ wss.on('connection',async function (connection,req){
     })
 })
 
+process.on('unhandledRejection', (reason, p) => {
+    console.log('Promise: ', p, 'Reason: ', reason)
+    // do something
+  })
+
