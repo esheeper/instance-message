@@ -7,7 +7,7 @@ const {
     redisSadd,
  } = require('./util/redisUtil')
 const {jwtVerifyTokenHandle} = require('./util/jwtUtil')
-const verifyArrivalPackage = require('./util/verifyArrivalPackage')
+const verifyArrivalPackage = require('./util/verifyArrivalPackage').default
 const {
     errorSendFunc,
     pongSendFunc,
