@@ -100,20 +100,26 @@ wss.on('connection',async function (connection,req){
 
     connection.on("message",async function (data) 
     {
-        data = verifyArrivalPackage(data)
-        if(data == null)
-        {
-            errorSendFunc(connection,0,ERR_BAD_DATA_FORMATION)
-        }
-        let type = data["type"]
-        if(type == "P")
-        {
-            pongSendFunc(connection,data["id"])
-            socketList[socketid][ping] = Date.now()
-            return
-        }
         try
         {
+            try{
+                data = verifyArrivalPackage(data)
+                if(data == null)
+                {
+                    errorSendFunc(connection,0,ERR_BAD_DATA_FORMATION)
+                    return;
+                }
+            }catch(e)
+            {
+                errorSendFunc(connection,0,ERR_BAD_DATA_FORMATION)
+            }
+            let type = data["type"]
+            if(type == "P")
+            {
+                pongSendFunc(connection,data["id"])
+                socketList[socketid][ping] = Date.now()
+                return
+            }
             switch (type){
                 case "t":
                 {
