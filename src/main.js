@@ -7,7 +7,7 @@ const {
     redisSadd,
  } = require('./util/redisUtil')
 const {jwtVerifyTokenHandle} = require('./util/jwtUtil')
-const verifyArrivalPackage = require('./util/verifyArrivalPackage').default
+const verifyArrivalPackage = require('./util/verifyArrivalPackage')
 const {
     errorSendFunc,
     pongSendFunc,
@@ -103,6 +103,7 @@ wss.on('connection',async function (connection,req){
         try
         {
             try{
+                console.log("2",data);
                 data = verifyArrivalPackage(data)
                 if(data == null)
                 {
