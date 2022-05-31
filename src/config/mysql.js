@@ -1,8 +1,8 @@
 const MYSQL_CONFIG = {
     HOST:"localhost",
-    USER:"root",
-    PASSWORD:"geeksheep",
-    DATABASE:"huorunrun"
+    USER:"kmservice",
+    PASSWORD:"zXNA6YSSTds3jNzy",
+    DATABASE:"kmservice"
 }
 
 module.exports = MYSQL_CONFIG

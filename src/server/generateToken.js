@@ -8,7 +8,9 @@ async function main(id)
         {"id":id,"type":"websocket"},
         privateKey,
         {algorithm: 'RS256',expiresIn: 60 * 2})
+        console.log(result)
     return result
 }
 
-module.exports = main
+main();
+// module.exports = main
