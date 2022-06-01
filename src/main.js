@@ -309,7 +309,7 @@ wss.on('connection',async function (connection,req){
                 }
                 case "T":
                 {   
-                    let [order] = await pool.execute(`select * from \`require\` where id = ? and deliver = ?`,[data["msg"],socketid]);
+                    let [order] = await pool.execute(`select * from \`require\` where id = ? and deliver = ? and state in (1011,1111),`,[data["msg"],socketid]);
                     if(order.length == 0)
                     {
                         errorSendFunc(connection,data["id"],ERR_CANT_FIND_ORDER)
