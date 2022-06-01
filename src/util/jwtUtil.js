@@ -5,7 +5,7 @@ const {redisGet} = require('./redisUtil')
 
 const jwtVerifyTokenHandle = async (data) => {
   // token 解密 返回Promise
-  console.log(data)
+  console.log("2",data)
   const privateKey = await redisGet("publicKey")
   return new Promise((resolve, reject) => {
     jwt.verify(data, privateKey, {}, (err, decoded) => {

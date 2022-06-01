@@ -316,20 +316,21 @@ wss.on('connection',async function (connection,req){
                     }
                     else
                     {
+                        order = order[0];
                         let message = {
                             form:socketid,
                             to:order["costomer"],
                             type:"s",
-                            message:""+order[0]["id"],
+                            message:""+order["id"],
                             send:false,
                             timestamp:new Date()
                         }
 
-                        //在这里只建立收货人和送货人之间的联系,用户接单的时候就会建立客户和带货人的联系
-                        redisSadd(socketid,order[0]["costomer"])
-                        redisSadd(order[0]["costomer"],socketid)                       
-                        
-                        if(socketList[order["costomer"]] != null)
+                        //在这里只建立发货人和送货人之间的联系,用户接单的时候就会建立客户和带货人的联系
+                        redisSadd(socketid,order["costomer"])
+                        redisSadd(order["costomer"],socketid)                       
+
+                        if(socketList[order["costomer"]])
                         {
                             try{
                                 await redisLpush("MQ",JSON.stringify(message));
@@ -340,11 +341,15 @@ wss.on('connection',async function (connection,req){
                                 return
                             }
                             msgSendFunc(socketList[order["costomer"]]["socket"],data["id"],socketid,"s",message["message"],connection,message["timestamp"],1)
+                            systemSendFunc(connection,data["id"],0,"A","success");
+                            return;
                         }
                         else
                         {
                             try{
                                 await redisLpush("MQ",JSON.stringify(message));
+                                systemSendFunc(connection,data["id"],0,"A","success");
+                                return;
                             }
                             catch(e)
                             {
@@ -356,7 +361,7 @@ wss.on('connection',async function (connection,req){
                     }
                 }
                 default:
-                    console.log(type)
+                    console.log("errorType:"+type)
                     errorSendFunc(connection,"Error type")
                     break
             }

@@ -12,5 +12,5 @@ async function main(id)
     return result
 }
 
-main();
+main(1);
 // module.exports = main

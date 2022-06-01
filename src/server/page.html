@@ -50,12 +50,8 @@
         if(ws != null){
             ws.close()
         }
-
-        let tokenid = $("#tokenid").val()
-        $.get("http://localhost:3001/"+tokenid,function(token){
-
+            let token = $("#tokenid").val()
             console.log(token)
-            
             ws = new WebSocket("ws://localhost:8181/"+token)
 
             ws.onopen = function (e) {
@@ -72,11 +68,9 @@
                 fath.append("<p>"+"登出"+"</p>")
             }
 
-        })
+        
     
     }
-
-    
     function sendMessage() {
         let to = $('#to').val()
         let type = $("#type").val()
