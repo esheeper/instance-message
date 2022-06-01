@@ -325,7 +325,7 @@ wss.on('connection',async function (connection,req){
                             send:false,
                             timestamp:new Date()
                         }
-
+                        console.log(message);
                         //在这里只建立发货人和送货人之间的联系,用户接单的时候就会建立客户和带货人的联系
                         redisSadd(socketid,order["costomer"])
                         redisSadd(order["costomer"],socketid)                       
