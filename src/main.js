@@ -309,7 +309,7 @@ wss.on('connection',async function (connection,req){
                 }
                 case "T":
                 {   
-                    let [message,order] = await Promise.all([pool.execute(`select * from \`message\` where id = ? and \`from\` = ?`,[data["msg"],socketid]),
+                    let [message,order] =await Promise.all([pool.execute(`select * from \`message\` where id = ? and \`from\` = ?`,[data["msg"],socketid]),
                     pool.execute(`select * from \`require\` where id = ? and deliver = ? and state in (1011,1111)`,[data["msg"],socketid])]) 
                     if(message.length > 0)
                     {
