@@ -314,10 +314,12 @@ wss.on('connection',async function (connection,req){
                     if(message.length > 0)
                     {
                         errorSendFunc(connection,data["id"],"Already send!");
+                        return;
                     }
                     if(order.length == 0)
                     {
                         errorSendFunc(connection,data["id"],ERR_CANT_FIND_ORDER);
+                        return;
                     }
                     else
                     {
