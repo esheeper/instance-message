@@ -72,8 +72,6 @@ wss.on('connection',async function (connection,req){
             connection.close();
             return;
         }
-        
-        console.log(dcode)
 
         socketid = dcode["id"]
 
@@ -116,8 +114,8 @@ wss.on('connection',async function (connection,req){
             let type = data["type"]
             if(type == "P")
             {
+                socketList[socketid]["ping"] = Date.now();
                 pongSendFunc(connection,data["id"])
-                socketList[socketid][ping] = Date.now();
                 return;
             }
             switch (type){
