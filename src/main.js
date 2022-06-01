@@ -117,8 +117,8 @@ wss.on('connection',async function (connection,req){
             if(type == "P")
             {
                 pongSendFunc(connection,data["id"])
-                socketList[socketid][ping] = Date.now()
-                return
+                socketList[socketid][ping] = Date.now();
+                return;
             }
             switch (type){
                 case "t":
@@ -250,10 +250,10 @@ wss.on('connection',async function (connection,req){
                 {
                     // 首先要判断用户是否是带货员,根据redis的DEVELIVER集合
                     let is = await redisSismember("DELIVER",socketid);
-                    let [longtitude,latitude] = coordtransform.gcj02towgs84(data["msg"]["longtitude"],data["msg"]["latitude"])  
+                    let [longitude,latitude] = coordtransform.gcj02towgs84(data["msg"]["longitude"],data["msg"]["latitude"])  
                     if(is)
                     {
-                        redisGeoadd("GEO:DELIVER",[longtitude,latitude,socketid]);
+                        redisGeoadd("GEO:DELIVER",[longitude,latitude,socketid]);
                         systemSendFunc(connection,data["id"],0,"A","updated position")
                         return
                     }
@@ -390,6 +390,5 @@ wss.on('connection',async function (connection,req){
 
 process.on('unhandledRejection', (reason, p) => {
     console.log('Promise: ', p, 'Reason: ', reason)
-    // do something
   })
 
