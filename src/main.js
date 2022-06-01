@@ -103,7 +103,6 @@ wss.on('connection',async function (connection,req){
         try
         {
             try{
-                console.log("2",data);
                 data = verifyArrivalPackage(data)
                 if(data == null)
                 {
@@ -357,6 +356,7 @@ wss.on('connection',async function (connection,req){
                     }
                 }
                 default:
+                    console.log(type)
                     errorSendFunc(connection,"Error type")
                     break
             }
