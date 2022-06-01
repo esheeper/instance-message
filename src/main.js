@@ -309,21 +309,26 @@ wss.on('connection',async function (connection,req){
                 }
                 case "T":
                 {   
-                    let [order] = await pool.execute(`select * from \`require\` where id = ? and deliver = ? and state in (1011,1111)`,[data["msg"],socketid]);
+                    let [message,order] = await Promise.all([pool.execute(`select * from \`${message}\` where id = ? and \`from\` = ?`,[data["msg"],socketid]),
+                    pool.execute(`select * from \`require\` where id = ? and deliver = ? and state in (1011,1111)`,[data["msg"],socketid])]) 
+                    if(message.length > 0)
+                    {
+                        errorSendFunc(connection,data["id"],"Already send!");
+                    }
                     if(order.length == 0)
                     {
-                        errorSendFunc(connection,data["id"],ERR_CANT_FIND_ORDER)
+                        errorSendFunc(connection,data["id"],ERR_CANT_FIND_ORDER);
                     }
                     else
                     {
                         order = order[0];
                         let message = {
-                            form:socketid,
-                            to:order["costomer"],
-                            type:"s",
-                            message:""+order["id"],
-                            send:false,
-                            timestamp:new Date()
+                            "from":socketid,
+                            "to":order["costomer"],
+                            "type":"s",
+                            "msg":""+order["id"],
+                            "send":false,
+                            "timestamp":new Date()
                         }
                         console.log(message);
                         console.log("1",JSON.stringify(message));
@@ -341,7 +346,7 @@ wss.on('connection',async function (connection,req){
                                 errorSendFunc(connection,data["id"],ERR_FAIL_TO_STORAGE_MESSAGE)
                                 return
                             }
-                            msgSendFunc(socketList[order["costomer"]]["socket"],data["id"],socketid,"s",message["message"],connection,message["timestamp"],1)
+                            msgSendFunc(socketList[order["costomer"]]["socket"],data["id"],socketid,"s",message["msg"],connection,message["timestamp"],1)
                             systemSendFunc(connection,data["id"],0,"A","success");
                             return;
                         }
