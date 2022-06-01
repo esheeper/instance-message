@@ -253,7 +253,7 @@ wss.on('connection',async function (connection,req){
                     let [longtitude,latitude] = coordtransform.gcj02towgs84(data["msg"]["longtitude"],data["msg"]["latitude"])  
                     if(is)
                     {
-                        redisGeoadd("GEO:DELIVER",[latitude,longtitude,socketid]);
+                        redisGeoadd("GEO:DELIVER",[longtitude,latitude,socketid]);
                         systemSendFunc(connection,data["id"],0,"A","updated position")
                         return
                     }
