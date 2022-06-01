@@ -228,8 +228,8 @@ wss.on('connection',async function (connection,req){
                     systemSendFunc(connection,data["id"],0,"A","",Date.now());
                     break
                 }
-                
-                case "O":{
+                case "O":
+                {
                     let oid = data["msg"]
                     if(socketList[oid] == null )       
                     {
