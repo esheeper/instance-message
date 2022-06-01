@@ -1,2 +1,2 @@
-/src/config
-/module
+/src/config/mysql.js
+/node_modules
