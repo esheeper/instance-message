@@ -347,6 +347,7 @@ wss.on('connection',async function (connection,req){
                                 return
                             }
                             msgSendFunc(socketList[order["costomer"]]["socket"],data["id"],socketid,"s",message["msg"],connection,message["timestamp"],1)
+                            msgSendFunc(socketList[order["costomer"]]["socket"],data["id"],socketid,"t","您好您的订单已被接收！",connection,message["timestamp"],1)
                             systemSendFunc(connection,data["id"],0,"A","success");
                             return;
                         }
