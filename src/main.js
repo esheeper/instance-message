@@ -326,7 +326,7 @@ wss.on('connection',async function (connection,req){
                             "from":socketid,
                             "to":order["costomer"],
                             "type":"s",
-                            "msg":""+order["id"],
+                            "msg":""+order,
                             "send":false,
                             "timestamp":new Date()
                         }
