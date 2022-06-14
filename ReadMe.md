@@ -1,9 +1,24 @@
+# 如何部署以及启动该服务器？
+    1. 需要Redis和Mysql数据库
+    2. Redis中需要储存RSA公钥和私钥，使用set publicKey以及set privateKey命令
+    3. 需要创建一张Message表，见server文件夹，user表并不是必须的
+    4. Redis需要用到的数据结构包括：
+        1).List MQ消息队列
+        2).Set URS:用户id，表明是否是好友关系
+        3).String publicKey,privateKey，Rsa加密算法的公钥和私钥
+    5. 需要在server中开启数据迁移脚本
+    6. 为了测试方便，我还在创捷了一个签发token的服务器，只需要启动tokenServer.js
+    7. 测试流程 开启main.js，src/server/tokenServer.js，generateToken.js三个进程，用浏览器打开page.html即可测试
+
+
+# 下面是说明文档
 # 这份文件中包含四部分
 
 ~~~
-src\main.js 是websocket服务器的启动文件
-src\config  是配置文件夹
-src\server  内含web测试用文件夹,以及redis到mysql数据迁移进程脚本
+src/main.js 是websocket服务器的启动文件
+src/config  是配置文件夹
+    要创建src/config/mysql.js，并配置数据库 
+src/server  内含web测试用文件夹,以及redis到mysql数据迁移进程脚本
 ~~~
 
 
